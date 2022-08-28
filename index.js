@@ -21,7 +21,7 @@ headingColumnNames.forEach((heading) => {
 
 // Create a reusable style
 var style = wb.createStyle({
-  numberFormat: '$#,##0.00;',
+  numberFormat: '#,##0.00;',
 });
 
 
