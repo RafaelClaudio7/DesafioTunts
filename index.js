@@ -1,20 +1,27 @@
 const express = require("express");
 const app = express();
 const axios = require("axios");
-
 const xl = require("excel4node");
 
 
 const wb = new xl.Workbook(); // Criando o obj tipo wb pra cria a planilha
 const ws = wb.addWorksheet("Nome da Planilha"); // criando a planilha
 
+const titleSheet = ["Countries List"];
+
+ws.cell(1, 1).string(titleSheet[0]);
 
 const headingColumnNames = ["Name", "Capital", "Area", "Currencies"];
 
 let headingColumnIndex = 1; // Para informar que será escrito na primeira linha da planilha
 
 headingColumnNames.forEach((heading) => {
-  ws.cell(1, headingColumnIndex++).string(heading);
+  ws.cell(2, headingColumnIndex++).string(heading);
+});
+
+// Create a reusable style
+var style = wb.createStyle({
+  numberFormat: '$#,##0.00;',
 });
 
 
@@ -24,7 +31,6 @@ function getKeyName (obj) {
         return key;
     }
 }
-
 
 app.use(express.json());
 
@@ -39,7 +45,7 @@ app.get("/", async (req, res) => {
     const obj = {
       nome: data[i].name.common,
       capital: data[i].capital,
-      area: data[i].area.toString(),
+      area: data[i].area,
       moeda: getKeyName(data[i].currencies),
     };
     countries.push(obj);
@@ -53,16 +59,24 @@ app.get("/", async (req, res) => {
 
 
   
-  let rowIndex = 2;
+  let rowIndex = 3;
   countries.forEach((record) => {
     let columnIndex = 1;
     Object.keys(record).forEach((columnName) => {
+      if(record[columnName] !== undefined && typeof(record[columnName]) !== 'number'){
       ws.cell(rowIndex, columnIndex++).string(record[columnName]);
+      }else if(typeof(record[columnName]) ===  'number'){
+        ws.cell(rowIndex, columnIndex++).number(record[columnName]).style(style);
+      }  
+      
+      else {
+        ws.cell(rowIndex, columnIndex++).string('-');
+      }
     });
     rowIndex++;
   });
 
-   wb.write("teste3.xlsx");
+   wb.write("teste.xlsx");
 
 
   return res.send({ message: "Reload to generate other datas" });
