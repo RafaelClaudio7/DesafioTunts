@@ -1,26 +1,27 @@
 const express = require("express");
 const app = express();
-const axios = require("axios"); // importando o axios para realizar data fetching
-const xl = require("excel4node"); // importando o a biblioteca excel4node para gerar a planilha
+const axios = require("axios"); // importingo axios to realize data fetching
+const xl = require("excel4node"); // importing excel lib
 
-const wb = new xl.Workbook(); // Criando o obj tipo wb pra cria a planilha
-const ws = wb.addWorksheet("Nome da Planilha"); // criando a planilha
+const wb = new xl.Workbook(); // Creating the object wb type to generate the sheet
+const ws = wb.addWorksheet("sheetName"); // Building the sheet
 
-// Função para extrair as chaves do Objeto de Currencies
+// Function to get the keys from currencies
 function getKeyName(obj) {
   for (let key in obj) {
     return key;
   }
 }
 
-// Ajustando o comprimento das células da planilha
+
+// Setting the size of cells
 
 ws.column(1).setWidth(15);
 ws.column(2).setWidth(15);
 ws.column(3).setWidth(15);
 ws.row(1).setHeight(30);
 
-// Ajustando o Estilo das células da planilha
+// Styling the cells
 var headerStyle = wb.createStyle({
   font: {
     size: 24,
@@ -37,18 +38,18 @@ var headingStyle = wb.createStyle({
   },
 });
 
-// Tornando o padrão adequado dos números
+// Formatting the numbers
 var numberStyleFormat = wb.createStyle({
   numberFormat: "#,##0.00;",
 });
 
-// Adicionado o Titulo dos dados da planilha
+// Adding sheet title
 ws.cell(1, 2).string("Countries List").style(headerStyle);
 
-// Definindo um array com os valores de cabeçalho da planilha
+// Creating an array with the column names
 const headingColumnNames = ["Name", "Capital", "Area", "Currencies"];
 
-// Definindo indice para percorrer as colunas através do foreach abaixo e aplicando o estilo adequado
+// Index of columns 
 let headingColumnIndex = 1;
 
 headingColumnNames.forEach((heading) => {
@@ -59,34 +60,33 @@ headingColumnNames.forEach((heading) => {
 
 app.use(express.json());
 
-// Porta 3000utilizada para subir o server
+// Server listening
 app.listen(3000, () => {
-  console.log("O Servidor esta sendo executado na porta 3000");
+  console.log("The server is listennig on port 3000");
 });
 
-// Rota raiz responsável por gerar a planilha
+// Root route that handle datas
 app.get("/", async (req, res) => {
   const { data } = await axios("https://restcountries.com/v3.1/all"); // Extraindo os dados da api
   const countries = [];
-  //Percorrendo os dados da api
   for (let i = 0; i < data.length; i++) {
     const obj = {
-      nome: data[i].name.common,
+      name: data[i].name.common,
       capital: data[i].capital,
       area: data[i].area,
       moeda: getKeyName(data[i].currencies),
     };
-    countries.push(obj); // adicionando ao meu array para colocar na planilha posteriormente
+    countries.push(obj); // Adding to an array with all countries
   }
-  // ordenando alfabeticamente os paises
+  // sorting the array
   countries.sort(function (a, b) {
-    return a.nome < b.nome ? -1 : a.nome > b.nome ? 1 : 0;
+    return a.name < b.aome ? -1 : a.aome > b.name ? 1 : 0;
   });
 
-  // log para teste
+  // log to test
   //console.log(countries[0]);
 
-  // Percorrer o array adicionando os valores as celulas do excel
+  // Adding all data to the sheet
 
   let rowIndex = 3;
   countries.forEach((record) => {
@@ -108,6 +108,7 @@ app.get("/", async (req, res) => {
     rowIndex++;
   });
 
+  // Creating the sheet with the name above
   wb.write("countriesList.xlsx");
 
   return res.send({ message: "Reload to generate other sheet" });
