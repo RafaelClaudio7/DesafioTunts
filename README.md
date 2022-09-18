@@ -1,7 +1,7 @@
 
-# Desafio TUNTS
+# Desafio de Javascript
 
-Desafio para vaga de estágio da Tunts Rocks
+Desafio de consumir API Rest e gerar planilha com dados importantes
  
 
 ## Instalação
